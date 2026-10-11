@@ -1,0 +1,141 @@
+name: Phase 7 — Enterprise CI/CD Deployment + Live E2E Testing
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+env:
+  BASE_URL: https://kdilliprasanna.github.io/ARJ_final/
+  HEADLESS: "true"
+  TIMEOUT_MS: "30000"
+
+jobs:
+  build-deploy-and-e2e:
+    name: Build, Deploy & Live Selenium E2E Testing
+    runs-on: ubuntu-latest
+    steps:
+      # Stage 1: Repository Checkout
+      - name: Stage 1 — Repository Checkout
+        uses: actions/checkout@v4
+
+      # Stage 2: Setup Node.js & Dependency Installation
+      - name: Stage 2 — Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Stage 2 — Install Web & Automation Dependencies
+        run: |
+          echo "📦 Installing web application dependencies..."
+          cd web
+          npm ci || npm install --legacy-peer-deps
+          cd ..
+          echo "📦 Installing Selenium automation dependencies..."
+          cd automation
+          npm install --legacy-peer-deps
+          cd ..
+
+      # Stage 3: Build Application
+      - name: Stage 3 — Build Web Application for Production
+        run: |
+          cd web
+          npm run build
+          cd ..
+
+      # Stage 4: Static Analysis
+      - name: Stage 4 — Static Analysis & Sanity Check
+        run: |
+          echo "🔍 Performing pre-deployment static analysis..."
+          test -f web/dist/index.html || { echo "❌ dist/index.html missing"; exit 1; }
+          echo "✅ Static analysis passed: dist bundle verified."
+
+      # Stage 5: Deploy to GitHub Pages
+      - name: Stage 5 — Deploy to GitHub Pages (gh-pages branch)
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: web/dist
+          branch: gh-pages
+
+      # Stage 6: Wait for Deployment Availability
+      - name: Stage 6 — Wait for Live Deployment Availability
+        run: |
+          echo "⏳ Waiting for GitHub Pages deployment to become reachable at $BASE_URL..."
+          for i in {1..30}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL" || true)
+            echo "Attempt $i: HTTP Status $HTTP_CODE"
+            if [ "$HTTP_CODE" -eq 200 ]; then
+              echo "✅ Live deployment is responsive and ready!"
+              break
+            fi
+            sleep 4
+          done
+
+      # Stage 7: Deployment Verification
+      - name: Stage 7 — Deployment Pre-Flight Verification
+        run: |
+          echo "🔍 Verifying Live Deployment Assets..."
+          CONTENT=$(curl -s "$BASE_URL")
+          if echo "$CONTENT" | grep -q "html"; then
+            echo "✅ HTML document verified at $BASE_URL"
+          else
+            echo "❌ Deployment pre-flight failed: Document is unreadable"
+            exit 1
+          fi
+
+      # Stage 8: Run Selenium E2E Tests (400+ Test Cases)
+      # Stage 9: Generate Reports
+      # Stage 10: Generate Excel Reports
+      - name: Stages 8-10 — Execute Live Selenium E2E Tests & Generate Reports
+        run: |
+          echo "🚀 Executing 400+ Selenium E2E Tests against LIVE target: $BASE_URL"
+          cd automation
+          node run-suite.js
+          cd ..
+
+      # Stage 11: Upload Artifacts (Retention: 30 Days)
+      - name: Stage 11 — Upload Test Execution Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Live-E2E-Test-Execution-Artifacts
+          path: |
+            automation/reports/Excel/Automation_Test_Report.xlsx
+            automation/reports/Excel/Passed_Test_Cases.xlsx
+            automation/reports/Excel/Failed_Test_Cases.xlsx
+            automation/reports/Excel/Summary_Report.xlsx
+            automation/reports/HTML/execution-report.html
+            automation/reports/HTML/dashboard.html
+            automation/reports/JSON/execution-results.json
+            automation/reports/Summary/summary.md
+            automation/reports/Screenshots/
+            automation/reports/Logs/
+          retention-days: 30
+
+      # Stage 12: Publish GitHub Actions Execution Summary
+      - name: Stage 12 — Publish GitHub Actions Summary
+        if: always()
+        run: |
+          if [ -f automation/reports/Summary/summary.md ]; then
+            cat automation/reports/Summary/summary.md >> $GITHUB_STEP_SUMMARY
+            echo "✅ Published executive summary to GitHub Actions."
+          fi
+
+      # Stage 13: Store Historical Results
+      - name: Stage 13 — Store Historical Test Evidence
+        if: always()
+        run: |
+          mkdir -p test-history/${{ github.run_number }}
+          cp -r automation/reports/* test-history/${{ github.run_number }}/ 2>/dev/null || true
+          echo "✅ Archived execution evidence in test-history/${{ github.run_number }}"

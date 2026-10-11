@@ -1,0 +1,45 @@
+{
+  "users": {
+    "validUser": {
+      "email": "navyaanand456@gmail.com",
+      "password": "Password123!",
+      "name": "Navya Anand"
+    },
+    "demoUser": {
+      "email": "user@arj.com",
+      "password": "Password123!",
+      "name": "Demo Seeker"
+    },
+    "invalidUser": {
+      "email": "nonexistent_seeker@domain.com",
+      "password": "WrongPassword999!"
+    },
+    "weakPasswordUser": {
+      "email": "weak@test.com",
+      "password": "123"
+    }
+  },
+  "modules": [
+    { "id": "AUTH", "name": "Authentication", "count": 40 },
+    { "id": "AUTHZ", "name": "Authorization", "count": 40 },
+    { "id": "NAV", "name": "Navigation", "count": 30 },
+    { "id": "UI", "name": "UI Validation", "count": 50 },
+    { "id": "FORM", "name": "Forms", "count": 50 },
+    { "id": "CRUD", "name": "CRUD Operations", "count": 50 },
+    { "id": "VAL", "name": "Input Validation", "count": 40 },
+    { "id": "ERR", "name": "Error Handling", "count": 20 },
+    { "id": "SESS", "name": "Session Management", "count": 20 },
+    { "id": "FILE", "name": "File Upload", "count": 20 },
+    { "id": "A11Y", "name": "Accessibility", "count": 20 },
+    { "id": "RESP", "name": "Responsive Design", "count": 20 },
+    { "id": "PERF", "name": "Performance Smoke Tests", "count": 20 },
+    { "id": "REGR", "name": "Regression", "count": 50 }
+  ],
+  "jobSearches": ["Frontend", "React", "Fullstack", "DevOps", "AI Engineer"],
+  "testResume": {
+    "fullName": "Navya Anand",
+    "targetRole": "Senior AI & Full Stack Engineer",
+    "summary": "Proven software engineer specialized in real-time platforms and cloud AI architectures.",
+    "skills": ["JavaScript", "React", "Node.js", "MongoDB", "Python", "CI/CD"]
+  }
+}
