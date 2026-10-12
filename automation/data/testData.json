@@ -22,6 +22,7 @@
   "modules": [
     { "id": "AUTH", "name": "Authentication", "count": 40 },
     { "id": "AUTHZ", "name": "Authorization", "count": 40 },
+    { "id": "VULN", "name": "Vulnerability Assessment & Security", "count": 40 },
     { "id": "NAV", "name": "Navigation", "count": 30 },
     { "id": "UI", "name": "UI Validation", "count": 50 },
     { "id": "FORM", "name": "Forms", "count": 50 },

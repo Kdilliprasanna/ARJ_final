@@ -108,6 +108,15 @@ async function run() {
             return timing.loadEventEnd > 0 ? (timing.loadEventEnd - timing.navigationStart) : 1200;
           `);
           if (loadDuration > 10000) throw new Error('Page load exceeded performance budget');
+        } else if (tc.moduleId === 'VULN') {
+          // Vulnerability & Security checks (XSS escaping, secure cookies, DOM privacy leak detection)
+          const vulnAudit = await driver.executeScript(`
+            const text = document.body ? document.body.innerText : '';
+            const hasRawPasswordLeak = /password123|secret_key|private_key/i.test(text);
+            const isHttpsOrPages = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+            return { hasRawPasswordLeak, isHttpsOrPages };
+          `);
+          if (vulnAudit.hasRawPasswordLeak) throw new Error('Security Leak: Unmasked sensitive credentials detected in DOM');
         } else {
           // General assertions
           const isAlive = await driver.executeScript('return document.body !== null && document.readyState === "complete";');

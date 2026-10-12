@@ -22,3 +22,6 @@ yarn-error.log*
 
 # Temporary files
 *.log
+reports/
+automation/reports/
+
