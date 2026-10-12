@@ -71,12 +71,12 @@ exports.config = {
     else if (testId.includes('COMP')) category = 'Compatibility';
     else if (testId.includes('PERF')) category = 'Performance';
     else if (testId.includes('SECU')) category = 'Security';
+    else if (testId.includes('VULN')) category = 'Vulnerability';
     else if (testId.includes('API')) category = 'API';
     else if (testId.includes('DB')) category = 'Database';
     else if (testId.includes('A11Y')) category = 'Accessibility';
     else if (testId.includes('MOBS')) category = 'Mobile-Specific';
-    else if (testId.includes('REGR')) category = 'Regression';
-    else if (testId.includes('E2E')) category = 'E2E';
+    else if (testId.includes('REGR') || testId.includes('E2E')) category = 'E2E & Regression';
 
     let realDuration = duration;
     if (!realDuration || realDuration <= 0) {

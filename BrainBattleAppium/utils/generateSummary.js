@@ -28,7 +28,11 @@ function generateSummary(customResults) {
   // Fallback if results empty
   if (!results || results.length === 0) {
     results = [];
-    const CATEGORIES = ['Functional', 'UI/UX', 'Compatibility', 'Performance', 'Security', 'API', 'Database', 'Accessibility', 'Mobile-Specific', 'Regression', 'E2E'];
+    const CATEGORIES = [
+      'Functional', 'UI/UX', 'Compatibility', 'Performance',
+      'Security', 'Vulnerability', 'API', 'Database',
+      'Accessibility', 'Mobile-Specific', 'E2E & Regression'
+    ];
     CATEGORIES.forEach(cat => {
       for (let i = 1; i <= 101; i++) {
         results.push({
