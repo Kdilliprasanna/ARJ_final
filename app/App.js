@@ -16,9 +16,9 @@ import { WebView } from 'react-native-webview';
 // Network Host Configuration: Auto-detect LAN IP of host machine with fallback
 const scriptURL = (NativeModules && NativeModules.SourceCode && NativeModules.SourceCode.scriptURL) || '';
 const detectedHost = scriptURL.match(/^https?:\/\/([^:\/]+)/)?.[1];
-const HOST_IP = detectedHost || '192.168.1.11';
+const HOST_IP = detectedHost || '192.168.1.12';
 const PRODUCTION_WEB_URL = 'https://kdilliprasanna.github.io/ARJ_final/';
-const WEB_URL = (__DEV__ && detectedHost) ? `http://${HOST_IP}:5176` : PRODUCTION_WEB_URL;
+const WEB_URL = `http://${HOST_IP}:5176`;
 const API_URL = `http://${HOST_IP}:4000/api`;
 
 // Injected CSS and JavaScript:
@@ -29,7 +29,7 @@ const API_URL = `http://${HOST_IP}:4000/api`;
 // 5. Accurate network error differentiation
 const INJECTED_BOOTSTRAP_JS = `
 (function() {
-  var HOST = (window.location && window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') ? window.location.hostname : '${HOST_IP}';
+  var HOST = '${HOST_IP}';
   var TARGET_API = 'http://' + HOST + ':4000';
   window.__ARJ_MOBILE_ENV__ = true;
   window.__BACKEND_IP__ = HOST;
@@ -339,11 +339,11 @@ const INJECTED_BOOTSTRAP_JS = `
     document.head.appendChild(style);
   }
 
-  // 2. URL rewrite helper: rewrites any localhost/127.0.0.1:4000 to http://192.168.1.15:4000
+  // 2. URL rewrite helper: rewrites any :4000 backend URL to TARGET_API
   function rewriteUrl(u) {
     if (typeof u === 'string') {
       return u
-        .replace(/https?:\\/\\/(localhost|127\\.0\\.0\\.1):4000/gi, TARGET_API)
+        .replace(/https?:\\/\\/[^/]+:4000/gi, TARGET_API)
         .replace(/^\\/api\\//i, TARGET_API + '/api/');
     }
     return u;
@@ -438,8 +438,9 @@ const INJECTED_BOOTSTRAP_JS = `
 true;
 `;
 
-export default function App() {
+function App() {
   const webViewRef = useRef(null);
+  const [currentUrl, setCurrentUrl] = useState(WEB_URL);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -468,6 +469,22 @@ export default function App() {
     }
   }, []);
 
+  const handleSwitchToCloud = useCallback(() => {
+    setHasError(false);
+    setIsLoading(true);
+    setErrorMessage('');
+    setBackendError('');
+    setCurrentUrl(PRODUCTION_WEB_URL);
+  }, []);
+
+  const handleSwitchToLocal = useCallback(() => {
+    setHasError(false);
+    setIsLoading(true);
+    setErrorMessage('');
+    setBackendError('');
+    setCurrentUrl(WEB_URL);
+  }, []);
+
   useEffect(() => {
     Animated.timing(bannerAnim, {
       toValue: (hasError || !!backendError) ? 1 : 0,
@@ -477,148 +494,195 @@ export default function App() {
   }, [hasError, backendError, bannerAnim]);
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.safeContainer} edges={['top', 'bottom', 'left', 'right']}>
-        <StatusBar barStyle="light-content" backgroundColor="#090d16" translucent={false} />
+    <SafeAreaView style={styles.safeContainer} edges={['top', 'bottom', 'left', 'right']}>
+      <StatusBar barStyle="light-content" backgroundColor="#090d16" translucent={false} />
 
-        {/* Backend Communication Failure / Offline Banner */}
-        {(hasError || !!backendError) && (
-          <Animated.View
-            style={[
-              styles.offlineBanner,
-              {
-                opacity: bannerAnim,
-                transform: [
-                  {
-                    translateY: bannerAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [-30, 0],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            <View style={styles.offlineDot} />
-            <Text style={styles.offlineText} numberOfLines={2}>
-              {backendError || `Cannot connect to ARJ Server (${HOST_IP}:4000). Ensure phone and PC are on the same Wi-Fi.`}
-            </Text>
-            {backendError ? (
-              <TouchableOpacity onPress={() => setBackendError('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Text style={styles.dismissText}>✕</Text>
+      {/* Backend Communication Failure / Offline Banner */}
+      {(hasError || !!backendError) && (
+        <Animated.View
+          style={[
+            styles.offlineBanner,
+            {
+              opacity: bannerAnim,
+              transform: [
+                {
+                  translateY: bannerAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-30, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <View style={styles.offlineDot} />
+          <Text style={styles.offlineText} numberOfLines={2}>
+            {backendError || `Cannot connect to ARJ Server (${HOST_IP}:4000). Ensure phone and PC are on the same Wi-Fi.`}
+          </Text>
+          {backendError ? (
+            <TouchableOpacity onPress={() => setBackendError('')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Text style={styles.dismissText}>✕</Text>
+            </TouchableOpacity>
+          ) : null}
+        </Animated.View>
+      )}
+
+      {/* Main Application Shell: Direct Edge-to-Edge WebView */}
+      <View style={styles.contentContainer}>
+        {hasError ? (
+          /* Graceful Native Fallback Screen */
+          <View style={styles.fallbackContainer}>
+            <View style={styles.fallbackCard}>
+              <View style={styles.logoBadge}>
+                <Text style={styles.logoText}>ARJ</Text>
+              </View>
+
+              <Text style={styles.fallbackTitle}>Connection Fallback</Text>
+              <Text style={styles.fallbackSubtitle}>
+                Unable to reach ARJ Career AI web server.
+              </Text>
+
+              <View style={styles.infoBox}>
+                <Text style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Web Shell: </Text>
+                  <Text style={styles.infoValue}>{currentUrl}</Text>
+                </Text>
+                <Text style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Backend API: </Text>
+                  <Text style={styles.infoValue}>{API_URL}</Text>
+                </Text>
+                <Text style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Database: </Text>
+                  <Text style={styles.infoValue}>MongoDB Atlas (arj_career_ai)</Text>
+                </Text>
+                {errorMessage ? (
+                  <Text style={styles.errorDetail}>Detail: {errorMessage}</Text>
+                ) : null}
+              </View>
+
+              <Text style={styles.instructionsText}>
+                Please verify your mobile device is connected to the same Wi-Fi network as the host computer ({HOST_IP}).
+              </Text>
+
+              <TouchableOpacity style={styles.retryButton} onPress={handleRetry} activeOpacity={0.8}>
+                <Text style={styles.retryButtonText}>Retry Local Server ({HOST_IP}) 🔄</Text>
               </TouchableOpacity>
-            ) : null}
-          </Animated.View>
+
+              <TouchableOpacity
+                style={[styles.retryButton, styles.cloudButton]}
+                onPress={handleSwitchToCloud}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.cloudButtonText}>Switch to Cloud Web App 🌐</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          /* Full-Screen Hardware-Accelerated WebView with Native Pull-To-Refresh */
+          <WebView
+            ref={webViewRef}
+            source={{ uri: currentUrl }}
+            style={styles.webView}
+            // Unrestricted network & storage access
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            mixedContentMode="always"
+            originWhitelist={['*']}
+            allowUniversalAccessFromFileURLs={true}
+            allowFileAccess={true}
+            allowFileAccessFromFileURLs={true}
+            allowsInlineMediaPlayback={true}
+            mediaPlaybackRequiresUserAction={false}
+            sharedCookiesEnabled={true}
+            thirdPartyCookiesEnabled={true}
+            cacheEnabled={true}
+            androidHardwareAccelerationDisabled={false}
+            androidLayerType="hardware"
+            pullToRefreshEnabled={true}
+            geolocationEnabled={true}
+            setSupportMultipleWindows={false}
+            bounces={true}
+            injectedJavaScriptBeforeContentLoaded={INJECTED_BOOTSTRAP_JS}
+            injectedJavaScript={INJECTED_BOOTSTRAP_JS}
+            onMessage={handleMessage}
+            onLoadStart={() => {
+              setIsLoading(true);
+              setHasError(false);
+            }}
+            onLoadEnd={() => {
+              setIsLoading(false);
+            }}
+            onError={(syntheticEvent) => {
+              const { nativeEvent } = syntheticEvent;
+              setHasError(true);
+              setErrorMessage(nativeEvent.description || 'Network unreachable');
+              setIsLoading(false);
+            }}
+            onHttpError={(syntheticEvent) => {
+              const { nativeEvent } = syntheticEvent;
+              if (nativeEvent.statusCode >= 400) {
+                setHasError(true);
+                setErrorMessage(`HTTP Error ${nativeEvent.statusCode}`);
+                setIsLoading(false);
+              }
+            }}
+          />
         )}
 
-        {/* Main Application Shell: Direct Edge-to-Edge WebView */}
-        <View style={styles.contentContainer}>
-          {hasError ? (
-            /* Graceful Native Fallback Screen */
-            <View style={styles.fallbackContainer}>
-              <View style={styles.fallbackCard}>
-                <View style={styles.logoBadge}>
-                  <Text style={styles.logoText}>ARJ</Text>
-                </View>
-
-                <Text style={styles.fallbackTitle}>Connection Fallback</Text>
-                <Text style={styles.fallbackSubtitle}>
-                  Unable to reach ARJ Career AI web server.
-                </Text>
-
-                <View style={styles.infoBox}>
-                  <Text style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Web Shell: </Text>
-                    <Text style={styles.infoValue}>{WEB_URL}</Text>
-                  </Text>
-                  <Text style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Backend API: </Text>
-                    <Text style={styles.infoValue}>{API_URL}</Text>
-                  </Text>
-                  <Text style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Database: </Text>
-                    <Text style={styles.infoValue}>MongoDB Atlas (arj_career_ai)</Text>
-                  </Text>
-                  {errorMessage ? (
-                    <Text style={styles.errorDetail}>Detail: {errorMessage}</Text>
-                  ) : null}
-                </View>
-
-                <Text style={styles.instructionsText}>
-                  Please verify your mobile device is connected to the same Wi-Fi network as the host computer ({HOST_IP}).
-                </Text>
-
-                <TouchableOpacity style={styles.retryButton} onPress={handleRetry} activeOpacity={0.8}>
-                  <Text style={styles.retryButtonText}>Retry Connection 🔄</Text>
-                </TouchableOpacity>
-              </View>
+        {/* Native Top Loading Progress Bar */}
+        {isLoading && !hasError && (
+          <View style={styles.loadingOverlay} pointerEvents="none">
+            <View style={styles.loadingPill}>
+              <ActivityIndicator size="small" color="#6366f1" />
+              <Text style={styles.loadingText}>Syncing ARJ Career AI...</Text>
             </View>
-          ) : (
-            /* Full-Screen Hardware-Accelerated WebView with Native Pull-To-Refresh */
-            <WebView
-              ref={webViewRef}
-              source={{ uri: WEB_URL }}
-              style={styles.webView}
-              // Unrestricted network & storage access
-              javaScriptEnabled={true}
-              domStorageEnabled={true}
-              mixedContentMode="always"
-              originWhitelist={['*']}
-              allowUniversalAccessFromFileURLs={true}
-              allowFileAccess={true}
-              allowFileAccessFromFileURLs={true}
-              allowsInlineMediaPlayback={true}
-              mediaPlaybackRequiresUserAction={false}
-              sharedCookiesEnabled={true}
-              thirdPartyCookiesEnabled={true}
-              cacheEnabled={true}
-              androidHardwareAccelerationDisabled={false}
-              androidLayerType="hardware"
-              pullToRefreshEnabled={true}
-              geolocationEnabled={true}
-              setSupportMultipleWindows={false}
-              bounces={true}
-              injectedJavaScriptBeforeContentLoaded={INJECTED_BOOTSTRAP_JS}
-              injectedJavaScript={INJECTED_BOOTSTRAP_JS}
-              onMessage={handleMessage}
-              onLoadStart={() => {
-                setIsLoading(true);
-                setHasError(false);
-              }}
-              onLoadEnd={() => {
-                setIsLoading(false);
-              }}
-              onError={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                setHasError(true);
-                setErrorMessage(nativeEvent.description || 'Network unreachable');
-                setIsLoading(false);
-              }}
-              onHttpError={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                if (nativeEvent.statusCode >= 400) {
-                  setHasError(true);
-                  setErrorMessage(`HTTP Error ${nativeEvent.statusCode}`);
-                  setIsLoading(false);
-                }
-              }}
-            />
-          )}
-
-          {/* Native Top Loading Progress Bar */}
-          {isLoading && !hasError && (
-            <View style={styles.loadingOverlay} pointerEvents="none">
-              <View style={styles.loadingPill}>
-                <ActivityIndicator size="small" color="#6366f1" />
-                <Text style={styles.loadingText}>Syncing ARJ Career AI...</Text>
-              </View>
-            </View>
-          )}
-        </View>
-      </SafeAreaView>
-    </SafeAreaProvider>
+          </View>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Mobile App ErrorBoundary caught error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#090d16', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <Text style={{ color: '#ef4444', fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>Application Encountered an Issue</Text>
+          <Text style={{ color: '#94a3b8', fontSize: 13, textAlign: 'center', marginBottom: 24, lineHeight: 18 }}>
+            {this.state.error?.message || 'Unexpected native rendering error'}
+          </Text>
+          <TouchableOpacity
+            style={{ backgroundColor: '#6366f1', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 12 }}
+            onPress={() => this.setState({ hasError: false, error: null })}
+          >
+            <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 14 }}>Reload Application 🔄</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function SafeApp() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+}
+
 
 const styles = StyleSheet.create({
   safeContainer: {
@@ -796,6 +860,17 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   retryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  cloudButton: {
+    backgroundColor: '#059669',
+    marginTop: 12,
+    shadowColor: '#059669',
+  },
+  cloudButtonText: {
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '800',
