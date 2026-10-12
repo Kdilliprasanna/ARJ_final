@@ -85,8 +85,16 @@ jobs:
             echo "APK_PATH=BrainBattleAppium/build/app-debug.apk" >> $GITHUB_ENV
           fi
 
-      # Step 6: Enable KVM Hardware Acceleration on Ubuntu Runner
-      - name: ⚡ Stage 6 — Enable KVM Hardware Acceleration
+      # Step 6: Execute Android Mobile Unit Tests (50 Tests)
+      - name: 📱 Stage 6 — Execute Appium Android Unit Tests (50 Tests)
+        run: |
+          echo "📱 Executing 50 Android Mobile Unit Tests..."
+          cd BrainBattleAppium
+          npm run test:unit
+          cd ..
+
+      # Step 7: Enable KVM Hardware Acceleration on Ubuntu Runner
+      - name: ⚡ Stage 7 — Enable KVM Hardware Acceleration
         run: |
           echo "⚡ Configuring KVM hardware virtualization on runner..."
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -96,8 +104,8 @@ jobs:
           ls -la /dev/kvm || true
           echo "✅ KVM configuration complete."
 
-      # Step 7: Launch Android Emulator & Execute Appium Suite (Unit, 1,111 E2E, Load)
-      - name: 🤖 Stage 7 — Run Appium Android Suite (Unit, 1,111 E2E, Load)
+      # Step 8: Launch Android Emulator & Execute Appium Suite (1,111 Tests)
+      - name: 🤖 Stage 8 — Run Appium Tests on Android Emulator (1,111 E2E Tests)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -109,8 +117,16 @@ jobs:
           disable-animations: true
           script: bash BrainBattleAppium/scripts/ci_run_tests.sh
 
-      # Step 8: Stage Test Reports for GitHub Pages Deployment
-      - name: 📊 Stage 8 — Stage Reports for GitHub Pages
+      # Step 9: Execute Android Mobile Load & Stress Tests (50 Tests)
+      - name: ⚡ Stage 9 — Execute Appium Android Load & Stress Tests (50 Tests)
+        run: |
+          echo "⚡ Executing 50 Android Mobile Load & Stress Tests..."
+          cd BrainBattleAppium
+          npm run test:load
+          cd ..
+
+      # Step 10: Stage Test Reports for GitHub Pages Deployment
+      - name: 📊 Stage 10 — Stage Reports for GitHub Pages
         if: always()
         run: |
           echo "📊 Staging HTML, Excel, and Markdown reports for gh-pages deployment..."
@@ -134,8 +150,8 @@ jobs:
           ls -la gh-pages-reports/reports/latest/ || true
           ls -la gh-pages-reports/reports/history/build-${{ github.run_number }}/ || true
 
-      # Step 9: Deploy HTML Reports to GitHub Pages
-      - name: 🚀 Stage 9 — Deploy Reports to GitHub Pages (gh-pages branch)
+      # Step 11: Deploy HTML Reports to GitHub Pages
+      - name: 🚀 Stage 11 — Deploy Reports to GitHub Pages (gh-pages branch)
         if: always()
         uses: JamesIves/github-pages-deploy-action@v4
         with:
@@ -143,8 +159,8 @@ jobs:
           branch: gh-pages
           clean: false
 
-      # Step 10: Upload Test Execution Artifacts (Retention: 30 Days)
-      - name: 📦 Stage 10 — Upload Test Execution Artifacts
+      # Step 12: Upload All Test Execution Artifacts (Retention: 30 Days)
+      - name: 📦 Stage 12 — Upload All Appium Test Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -157,8 +173,8 @@ jobs:
             BrainBattleAppium/.wdio-results.jsonl
           retention-days: 30
 
-      # Step 10B: Upload Standalone Passed Test Cases Excel Spreadsheet
-      - name: 📊 Stage 10B — Upload Passed Test Cases Excel Spreadsheet
+      # Step 12B: Upload Standalone Passed Test Cases Excel Spreadsheet
+      - name: 📊 Stage 12B — Upload Passed Test Cases Excel Spreadsheet
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -166,8 +182,8 @@ jobs:
           path: BrainBattleAppium/reports/Excel/Passed_Test_Cases.xlsx
           retention-days: 30
 
-      # Step 11: Publish GitHub Actions Step Summary
-      - name: 📝 Stage 11 — Publish GitHub Actions Execution Summary
+      # Step 13: Publish GitHub Actions Step Summary
+      - name: 📝 Stage 13 — Publish GitHub Actions Execution Summary
         if: always()
         run: |
           if [ -f BrainBattleAppium/reports/Summary/summary.md ]; then

@@ -25,7 +25,7 @@ exports.config = {
   port: 4723,
   path: '/',
   specs: [
-    process.env.WDIO_CI_SPEC || path.join(__dirname, 'tests', '12_e2e', 'mega_android_1100.test.js')
+    process.env.WDIO_CI_SPEC || path.join(__dirname, 'tests', '**', '*.test.js')
   ],
   exclude: [],
   maxInstances: 1,
@@ -49,7 +49,7 @@ exports.config = {
   reporters: ['spec'],
   mochaOpts: {
     ui: 'bdd',
-    timeout: 1200000 // 20 minutes for 1,111 tests
+    timeout: 1200000 // 20 minutes for suite
   },
 
   onPrepare: function(config, capabilities) {
@@ -67,7 +67,9 @@ exports.config = {
     const testId = idMatch ? idMatch[1] : `TC-${Date.now()}`;
 
     let category = 'Functional';
-    if (testId.includes('UIUX')) category = 'UI/UX';
+    if (testId.includes('UNIT')) category = 'Unit Testing';
+    else if (testId.includes('LOAD')) category = 'Load Testing';
+    else if (testId.includes('UIUX')) category = 'UI/UX';
     else if (testId.includes('COMP')) category = 'Compatibility';
     else if (testId.includes('PERF')) category = 'Performance';
     else if (testId.includes('SECU')) category = 'Security';
