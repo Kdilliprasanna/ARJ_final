@@ -302,6 +302,14 @@ class XlsxReporter {
 
     await workbook.xlsx.writeFile(targetFile);
     console.log(`[xlsxReporter] Generated Excel Report with ${totalTests} tests at: ${targetFile}`);
+
+    try {
+      const generatePassedExcel = require('./generatePassedExcelReport');
+      await generatePassedExcel(this.testResults, path.join(targetDir, 'Passed_Test_Cases.xlsx'));
+    } catch (e) {
+      console.warn('[xlsxReporter] Error generating Passed_Test_Cases.xlsx:', e.message);
+    }
+
     return targetFile;
   }
 }

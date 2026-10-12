@@ -12,6 +12,8 @@ const screenshotUtil = require('./utils/screenshotUtil');
 const excelReporter = require('./utils/excelReportGenerator');
 const htmlReporter = require('./utils/htmlReportGenerator');
 const summaryGenerator = require('./utils/summaryGenerator');
+const WebUnitTestSuite = require('./tests/unit/web_unit_tests');
+const WebLoadTestSuite = require('./tests/load/web_load_tests');
 
 async function verifyDeployment(baseUrl) {
   logger.info(`Validating live deployment pre-flight at: ${baseUrl}`);
@@ -154,6 +156,44 @@ async function run() {
     }
   }
 
+  // 4. Execute Web Unit Tests
+  logger.info('Running Web Unit Test Suite...');
+  const unitSuite = new WebUnitTestSuite();
+  const unitResults = await unitSuite.runAll();
+  unitResults.forEach(ur => {
+    results.unshift({
+      testCaseId: ur.testCaseId,
+      moduleId: 'UNIT_WEB',
+      priority: 'P1',
+      name: ur.name,
+      status: ur.status,
+      durationMs: ur.durationMs,
+      error: ur.error,
+      screenshot: null
+    });
+    if (ur.status === 'PASSED') passedCount++;
+    else failedCount++;
+  });
+
+  // 5. Execute Web Load Tests
+  logger.info('Running Web Load & Concurrency Test Suite...');
+  const loadSuite = new WebLoadTestSuite();
+  const loadResults = await loadSuite.runAll();
+  loadResults.forEach(lr => {
+    results.push({
+      testCaseId: lr.testCaseId,
+      moduleId: 'LOAD_WEB',
+      priority: 'P1',
+      name: lr.name,
+      status: lr.status,
+      durationMs: lr.durationMs,
+      error: lr.error,
+      screenshot: null
+    });
+    if (lr.status === 'PASSED') passedCount++;
+    else failedCount++;
+  });
+
   const durationSeconds = ((Date.now() - startTime) / 1000).toFixed(2);
   const total = results.length;
   const passRate = (passedCount / total) * 100;
@@ -182,6 +222,8 @@ async function run() {
 
   // Generate Reports
   await excelReporter.generateAllReports(results, metrics);
+  const generatePassedExcel = require('./utils/generatePassedExcelReport');
+  await generatePassedExcel(results);
   htmlReporter.generate(results, metrics);
   summaryGenerator.generate(results, metrics);
 

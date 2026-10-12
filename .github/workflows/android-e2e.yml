@@ -1,4 +1,4 @@
-name: Mobile Appium E2E — Android Emulator CI Runner (1,111 Tests)
+name: 📱 Appium — Android Mobile Suite (Unit, 1,111 E2E, Load)
 
 on:
   push:
@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  android-e2e-suite:
-    name: Mobile Appium E2E Execution (1,111 Android Tests)
+  appium-android-suite:
+    name: 📱 Appium — Android Suite (Unit, 1,111 E2E, Load)
     runs-on: ubuntu-latest
 
     steps:
@@ -96,8 +96,8 @@ jobs:
           ls -la /dev/kvm || true
           echo "✅ KVM configuration complete."
 
-      # Step 7: Launch Android Emulator & Execute Appium Suite (1,111 Tests)
-      - name: 🤖 Stage 7 — Run Appium Tests on Android Emulator (API 29, Nexus 6)
+      # Step 7: Launch Android Emulator & Execute Appium Suite (Unit, 1,111 E2E, Load)
+      - name: 🤖 Stage 7 — Run Appium Android Suite (Unit, 1,111 E2E, Load)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -148,12 +148,22 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Mobile-Appium-E2E-Artifacts-Run-${{ github.run_number }}
+          name: Appium-Android-All-Reports-Run-${{ github.run_number }}
           path: |
+            BrainBattleAppium/reports/Excel/Passed_Test_Cases.xlsx
             BrainBattleAppium/reports/Excel/Mobile_Appium_Test_Report.xlsx
             BrainBattleAppium/reports/HTML/execution-report.html
             BrainBattleAppium/reports/Summary/summary.md
             BrainBattleAppium/.wdio-results.jsonl
+          retention-days: 30
+
+      # Step 10B: Upload Standalone Passed Test Cases Excel Spreadsheet
+      - name: 📊 Stage 10B — Upload Passed Test Cases Excel Spreadsheet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Appium-Android-Passed-Test-Cases-Excel
+          path: BrainBattleAppium/reports/Excel/Passed_Test_Cases.xlsx
           retention-days: 30
 
       # Step 11: Publish GitHub Actions Step Summary

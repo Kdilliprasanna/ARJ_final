@@ -5,10 +5,13 @@
   "main": "wdio.conf.js",
   "scripts": {
     "test": "wdio run wdio.conf.js",
+    "test:unit": "node tests/unit/android_unit_tests.js",
+    "test:load": "node tests/load/android_load_tests.js",
     "test:ci": "bash scripts/ci_run_tests.sh",
     "report:html": "node utils/generateHtmlReport.js",
     "report:summary": "node utils/generateSummary.js",
-    "report:fallback": "node utils/generateFallbackReport.js"
+    "report:fallback": "node utils/generateFallbackReport.js",
+    "report:passed": "node utils/generatePassedExcelReport.js"
   },
   "keywords": [
     "appium",

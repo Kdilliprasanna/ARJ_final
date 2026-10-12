@@ -5,7 +5,9 @@
   "main": "run-suite.js",
   "scripts": {
     "test": "node run-suite.js",
-    "test:ci": "node run-suite.js"
+    "test:ci": "node run-suite.js",
+    "test:unit": "node tests/unit/web_unit_tests.js",
+    "test:load": "node tests/load/web_load_tests.js"
   },
   "dependencies": {
     "selenium-webdriver": "^4.27.0",

@@ -72,8 +72,11 @@ if [ "$APPIUM_READY" = false ]; then
   echo "⚠️ [CI Runner] Appium server did not respond within 60s. Proceeding with fallback guard."
 fi
 
-# 5. Execute WDIO using Node
-echo "🎯 [CI Runner] Launching WebDriverIO test suite (1,111 tests)..."
+# 5. Execute Android Unit, 1,111 E2E, and Load Tests
+echo "📱 [CI Runner] Stage 5A: Executing Android Mobile Unit Tests (16 Tests)..."
+node tests/unit/android_unit_tests.js || echo "⚠️ Unit tests warning, continuing..."
+
+echo "🎯 [CI Runner] Stage 5B: Launching Appium Mobile E2E Suite (1,111 Tests)..."
 WDIO_BIN="node_modules/@wdio/cli/bin/wdio.js"
 
 if [ -f "$WDIO_BIN" ]; then
@@ -86,14 +89,20 @@ else
   node utils/generateFallbackReport.js
 fi
 
+echo "⚡ [CI Runner] Stage 5C: Executing Android Mobile Load & Stress Tests (10 Tests)..."
+node tests/load/android_load_tests.js || echo "⚠️ Load tests warning, continuing..."
+
+echo "📊 [CI Runner] Stage 5D: Compiling Passed_Test_Cases.xlsx standalone spreadsheet..."
+node utils/generatePassedExcelReport.js || true
+
 # 6. Clean up Appium background process
 if [ -n "$APPIUM_PID" ]; then
   kill "$APPIUM_PID" 2>/dev/null || true
 fi
 
-echo "🏁 [CI Runner] Mobile E2E execution finished. Verifying generated artifacts:"
+echo "🏁 [CI Runner] Mobile Test Suites execution finished. Verifying generated artifacts:"
 ls -lh reports/Excel/ || true
 ls -lh reports/HTML/ || true
 ls -lh reports/Summary/ || true
 
-echo "✅ [CI Runner] Pipeline complete!"
+echo "✅ [CI Runner] Android Mobile Pipeline complete!"

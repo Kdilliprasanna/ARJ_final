@@ -1,4 +1,4 @@
-name: Phase 7 — Enterprise CI/CD Deployment + Live E2E Testing
+name: 🌐 Selenium — Web Automation Suite (Unit, E2E, Load)
 
 on:
   push:
@@ -20,8 +20,8 @@ env:
   TIMEOUT_MS: "30000"
 
 jobs:
-  build-deploy-and-e2e:
-    name: Build, Deploy & Live Selenium E2E Testing
+  selenium-web-suite:
+    name: 🌐 Selenium — Web Test Suite (Unit, E2E, Load)
     runs-on: ubuntu-latest
     steps:
       # Stage 1: Repository Checkout
@@ -94,25 +94,39 @@ jobs:
             exit 1
           fi
 
-      # Stage 8: Run Selenium E2E Tests (400+ Test Cases)
-      # Stage 9: Generate Reports
-      # Stage 10: Generate Excel Reports
-      - name: Stages 8-10 — Execute Live Selenium E2E Tests & Generate Reports
+      # Stage 8: Run Selenium Web Unit Tests
+      - name: Stage 8 — Execute Web Unit Tests (20 Tests)
+        run: |
+          echo "🧪 Executing Selenium Web Unit Tests..."
+          cd automation
+          npm run test:unit
+          cd ..
+
+      # Stage 9: Run Live Selenium E2E Tests (400+ Test Cases)
+      - name: Stage 9 — Execute Live Selenium E2E Tests & Generate Reports
         run: |
           echo "🚀 Executing 400+ Selenium E2E Tests against LIVE target: $BASE_URL"
           cd automation
           node run-suite.js
           cd ..
 
-      # Stage 11: Upload Artifacts (Retention: 30 Days)
-      - name: Stage 11 — Upload Test Execution Artifacts
+      # Stage 10: Run Selenium Web Load Tests
+      - name: Stage 10 — Execute Web Load & Concurrency Tests (10 Tests)
+        run: |
+          echo "⚡ Executing Selenium Web Load Tests..."
+          cd automation
+          npm run test:load
+          cd ..
+
+      # Stage 11: Upload All Test Execution Artifacts
+      - name: Stage 11 — Upload All Selenium Test Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Live-E2E-Test-Execution-Artifacts
+          name: Selenium-Web-Test-Artifacts
           path: |
-            automation/reports/Excel/Automation_Test_Report.xlsx
             automation/reports/Excel/Passed_Test_Cases.xlsx
+            automation/reports/Excel/Automation_Test_Report.xlsx
             automation/reports/Excel/Failed_Test_Cases.xlsx
             automation/reports/Excel/Summary_Report.xlsx
             automation/reports/HTML/execution-report.html
@@ -121,6 +135,15 @@ jobs:
             automation/reports/Summary/summary.md
             automation/reports/Screenshots/
             automation/reports/Logs/
+          retention-days: 30
+
+      # Stage 11B: Upload Standalone Passed Test Cases Excel Spreadsheet
+      - name: Stage 11B — Upload Passed Test Cases Excel Spreadsheet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Selenium-Passed-Test-Cases-Excel
+          path: automation/reports/Excel/Passed_Test_Cases.xlsx
           retention-days: 30
 
       # Stage 12: Publish GitHub Actions Execution Summary
