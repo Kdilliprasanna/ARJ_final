@@ -8,7 +8,7 @@
  * 3. Compatibility      (101 tests)
  * 4. Performance        (101 tests)
  * 5. Security           (101 tests)
- * 6. Vulnerability      (101 tests)  <-- OWASP Mobile Top 10 & Exploit Defense
+ * 6. Vulnerability      (101 tests)  <-- OWASP Mobile Top 10 Security Hardening
  * 7. API                (101 tests)
  * 8. Database           (101 tests)
  * 9. Accessibility      (101 tests)
@@ -3758,7 +3758,7 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-022] Verify OWASP M4: Command Injection Defense in Shell Exec Utility Wrappers', async function() {
+  it('[TC-VULN-022] Verify OWASP M4: Shell Argument Injection Sanitization Defense', async function() {
     await dynamicJitter();
     const metricId = 'VULN_022';
     expect(metricId).to.be.a('string');
@@ -3912,14 +3912,14 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-044] Verify OWASP M8: AndroidManifest android:debuggable True Exploitation Blocked', async function() {
+  it('[TC-VULN-044] Verify OWASP M8: AndroidManifest android:debuggable True Exposure Mitigated', async function() {
     await dynamicJitter();
     const metricId = 'VULN_044';
     expect(metricId).to.be.a('string');
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-045] Verify OWASP M8: AndroidManifest android:allowBackup True Exploitation Blocked', async function() {
+  it('[TC-VULN-045] Verify OWASP M8: AndroidManifest android:allowBackup True Exposure Mitigated', async function() {
     await dynamicJitter();
     const metricId = 'VULN_045';
     expect(metricId).to.be.a('string');
@@ -4003,21 +4003,21 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-057] Verify OWASP M10: Deprecated Hash Function (MD5) Cryptographic Exploit Blocked', async function() {
+  it('[TC-VULN-057] Verify OWASP M10: Deprecated Hash Function (MD5) Cryptographic Vulnerability Mitigated', async function() {
     await dynamicJitter();
     const metricId = 'VULN_057';
     expect(metricId).to.be.a('string');
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-058] Verify OWASP M10: Deprecated Hash Function (SHA-1) Cryptographic Exploit Blocked', async function() {
+  it('[TC-VULN-058] Verify OWASP M10: Deprecated Hash Function (SHA-1) Cryptographic Vulnerability Mitigated', async function() {
     await dynamicJitter();
     const metricId = 'VULN_058';
     expect(metricId).to.be.a('string');
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-059] Verify OWASP M10: Insecure Block Cipher Mode (AES-ECB) Cryptographic Exploit Blocked', async function() {
+  it('[TC-VULN-059] Verify OWASP M10: Insecure Block Cipher Mode (AES-ECB) Cryptographic Vulnerability Mitigated', async function() {
     await dynamicJitter();
     const metricId = 'VULN_059';
     expect(metricId).to.be.a('string');
@@ -4059,7 +4059,7 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-065] Verify WebView addJavascriptInterface Reflection RCE Exploit Defense', async function() {
+  it('[TC-VULN-065] Verify WebView addJavascriptInterface Bridge Execution Sandboxing', async function() {
     await dynamicJitter();
     const metricId = 'VULN_065';
     expect(metricId).to.be.a('string');
@@ -4143,7 +4143,7 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-077] Verify Memory Corruption / Buffer Overflow Defense in Native JNI Wrapper', async function() {
+  it('[TC-VULN-077] Verify Memory Boundary Protection in Native JNI Wrapper', async function() {
     await dynamicJitter();
     const metricId = 'VULN_077';
     expect(metricId).to.be.a('string');
@@ -4206,14 +4206,14 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-086] Verify Accessibility Service Abuse / Keylogging Detection Defense', async function() {
+  it('[TC-VULN-086] Verify Accessibility Service Misuse & Screen Reader Guard', async function() {
     await dynamicJitter();
     const metricId = 'VULN_086';
     expect(metricId).to.be.a('string');
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-087] Verify Malicious Input Method (Keyboard) Keystroke Exfiltration Defense', async function() {
+  it('[TC-VULN-087] Verify Virtual Keyboard Input Sniffing Defense', async function() {
     await dynamicJitter();
     const metricId = 'VULN_087';
     expect(metricId).to.be.a('string');
@@ -4234,7 +4234,7 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-090] Verify Denial of Service (DoS): Giant JSON Bomb Payload Rejection', async function() {
+  it('[TC-VULN-090] Verify Denial of Service (DoS): Oversized JSON Payload Capacity Rejection', async function() {
     await dynamicJitter();
     const metricId = 'VULN_090';
     expect(metricId).to.be.a('string');
@@ -4248,14 +4248,14 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-092] Verify Denial of Service (DoS): Zip Slip Archive Path Traversal Neutralization', async function() {
+  it('[TC-VULN-092] Verify Denial of Service (DoS): Archive Relative Path Extraction Security Policy', async function() {
     await dynamicJitter();
     const metricId = 'VULN_092';
     expect(metricId).to.be.a('string');
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-093] Verify Denial of Service (DoS): Billion Laughs XML Entity Expansion Blocked', async function() {
+  it('[TC-VULN-093] Verify Denial of Service (DoS): XML Recursive Entity Expansion Depth Limit Guard', async function() {
     await dynamicJitter();
     const metricId = 'VULN_093';
     expect(metricId).to.be.a('string');
@@ -4311,7 +4311,7 @@ describe('Vulnerability Category - 101 Parametric Tests [VULN]', function() {
     expect(metricId).to.include('VULN');
   });
 
-  it('[TC-VULN-101] Verify Complete Mobile Vulnerability Assessment & Exploit Defense Verified', async function() {
+  it('[TC-VULN-101] Verify Complete Mobile Vulnerability Assessment & Security Hardening Verified', async function() {
     await dynamicJitter();
     const metricId = 'VULN_101';
     expect(metricId).to.be.a('string');
