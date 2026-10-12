@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "ARJ Career AI",
+    "slug": "arj-career-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#090d16"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.arj.career"
+    },
+    "android": {
+      "package": "com.arj.career",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#090d16"
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "INTERNET"
+      ]
+    },
+    "extra": {
+      "webUrl": "http://192.168.1.15:5176",
+      "apiUrl": "http://192.168.1.15:4000/api"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}

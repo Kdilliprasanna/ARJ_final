@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+.npmrc
+
+# Expo & build outputs
+.expo/
+dist/
+web-build/
+
+# Native builds
+android/
+ios/
+
+# Logs & Temporary files
+*.log
+*.txt
+*.aar
+*.apk
+*.aab
+.idea/
+.vscode/
+.DS_Store

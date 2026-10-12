@@ -10,7 +10,14 @@ This repository contains the complete web application deployed and organized und
 ARJ_final/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml          # Automated GitHub Pages CI/CD Deployment
+│       └── deploy-and-test.yml # Automated CI/CD Deployment & Live E2E Testing
+├── app/                        # Cross-Platform Mobile Application (React Native & Expo SDK 57)
+│   ├── App.js                  # Native Application Shell & Dynamic API Engine
+│   ├── app.json                # Expo Manifest & Native Configuration
+│   ├── assets/                 # App launcher icons, splash screens & logos
+│   ├── src/                    # Screens, Navigation & API Client
+│   ├── eas.json                # Standalone APK / AAB Build Profiles
+│   └── package.json            # Mobile Dependencies
 ├── web/                        # Complete Web Application Source & Build
 │   ├── src/                    # React components, pages, styles & offline sync
 │   │   ├── OfflineCareerApp.jsx# Core Application Engine
@@ -21,6 +28,7 @@ ARJ_final/
 │   ├── package.json            # Dependencies & scripts
 │   ├── vite.config.js          # Vite build & proxy configuration
 │   └── index.html              # HTML entry point
+├── automation/                 # Selenium E2E Test Suite (500+ Automated Tests)
 ├── .gitignore                  # Git ignore rules
 └── README.md                   # Platform documentation
 ```
@@ -44,6 +52,29 @@ The app will run locally at `http://localhost:5176`.
 ### 3. Build for Production
 ```bash
 npm run build
+```
+
+---
+
+## 📱 Quick Start (Running the Mobile App Locally)
+
+### 1. Install Dependencies
+```bash
+cd app
+npm install --legacy-peer-deps
+```
+
+### 2. Run with Expo Go
+```bash
+# LAN mode (recommended for phones on same Wi-Fi network)
+npx expo start --lan
+```
+Scan the terminal QR code in **Expo Go** (Android / iOS).
+
+### 3. Standalone Mobile Builds (EAS Build)
+```bash
+npm install -g eas-cli
+eas build -p android --profile preview
 ```
 
 ---
