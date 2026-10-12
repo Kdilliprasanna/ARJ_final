@@ -23,15 +23,15 @@ async function generatePassedExcel(results, outputPath) {
   const targetDir = path.dirname(targetPath);
   if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
 
-  let testItems = results;
-  if (!testItems || !Array.isArray(testItems) || testItems.length === 0) {
+  let testItems = results ? [...results] : [];
+  if (testItems.length === 0) {
     const defsPath = path.join(__dirname, '../data/testCasesDefinition.json');
     if (fs.existsSync(defsPath)) {
       try {
         const defs = JSON.parse(fs.readFileSync(defsPath, 'utf8'));
         testItems = defs.map(d => ({
           testCaseId: d.testCaseId,
-          module: d.module,
+          module: d.module || 'Selenium E2E',
           name: d.name,
           status: 'PASSED',
           durationMs: Math.floor(Math.random() * 15) + 5,
@@ -40,6 +40,48 @@ async function generatePassedExcel(results, outputPath) {
       } catch (e) {
         testItems = [];
       }
+    }
+  }
+
+  // Ensure Unit Tests are included
+  const hasUnitTests = testItems.some(t => t.module === 'Web Unit Tests' || t.moduleId === 'UNIT_WEB');
+  if (!hasUnitTests) {
+    try {
+      const WebUnitTestSuite = require('../tests/unit/web_unit_tests');
+      const unitSuite = new WebUnitTestSuite();
+      const unitResults = await unitSuite.runAll();
+      const unitPassed = unitResults.map(u => ({
+        testCaseId: u.testCaseId,
+        module: 'Web Unit Tests',
+        name: u.name,
+        status: u.status,
+        durationMs: u.durationMs,
+        timestamp: new Date().toISOString()
+      }));
+      testItems.unshift(...unitPassed);
+    } catch (e) {
+      console.warn('[generatePassedExcel] Could not run WebUnitTestSuite:', e.message);
+    }
+  }
+
+  // Ensure Load Tests are included
+  const hasLoadTests = testItems.some(t => t.module === 'Web Load Tests' || t.moduleId === 'LOAD_WEB');
+  if (!hasLoadTests) {
+    try {
+      const WebLoadTestSuite = require('../tests/load/web_load_tests');
+      const loadSuite = new WebLoadTestSuite();
+      const loadResults = await loadSuite.runAll();
+      const loadPassed = loadResults.map(l => ({
+        testCaseId: l.testCaseId,
+        module: 'Web Load Tests',
+        name: l.name,
+        status: l.status,
+        durationMs: l.durationMs,
+        timestamp: new Date().toISOString()
+      }));
+      testItems.push(...loadPassed);
+    } catch (e) {
+      console.warn('[generatePassedExcel] Could not run WebLoadTestSuite:', e.message);
     }
   }
 

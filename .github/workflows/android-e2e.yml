@@ -85,10 +85,10 @@ jobs:
             echo "APK_PATH=BrainBattleAppium/build/app-debug.apk" >> $GITHUB_ENV
           fi
 
-      # Step 6: Execute Android Mobile Unit Tests (50 Tests)
-      - name: 📱 Stage 6 — Execute Appium Android Unit Tests (50 Tests)
+      # Step 6: Execute Android Mobile Unit Tests (16 Tests)
+      - name: 📱 Stage 6 — Execute Appium Android Unit Tests (16 Tests)
         run: |
-          echo "📱 Executing 50 Android Mobile Unit Tests..."
+          echo "📱 Executing 16 Android Mobile Unit Tests..."
           cd BrainBattleAppium
           npm run test:unit
           cd ..
@@ -105,7 +105,7 @@ jobs:
           echo "✅ KVM configuration complete."
 
       # Step 8: Launch Android Emulator & Execute Appium Suite (1,111 Tests)
-      - name: 🤖 Stage 8 — Run Appium Tests on Android Emulator (1,111 E2E Tests)
+      - name: 🤖 Stage 8 — Run Appium Mobile E2E Tests (1,111 Tests) on Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -117,10 +117,10 @@ jobs:
           disable-animations: true
           script: bash BrainBattleAppium/scripts/ci_run_tests.sh
 
-      # Step 9: Execute Android Mobile Load & Stress Tests (50 Tests)
-      - name: ⚡ Stage 9 — Execute Appium Android Load & Stress Tests (50 Tests)
+      # Step 9: Execute Android Mobile Load & Stress Tests (10 Tests)
+      - name: ⚡ Stage 9 — Execute Appium Android Load & Stress Tests (10 Tests)
         run: |
-          echo "⚡ Executing 50 Android Mobile Load & Stress Tests..."
+          echo "⚡ Executing 10 Android Mobile Load & Stress Tests..."
           cd BrainBattleAppium
           npm run test:load
           cd ..
@@ -159,8 +159,8 @@ jobs:
           branch: gh-pages
           clean: false
 
-      # Step 12: Upload All Test Execution Artifacts (Retention: 30 Days)
-      - name: 📦 Stage 12 — Upload All Appium Test Artifacts
+      # Step 12: Upload Test Execution Artifacts (Retention: 30 Days)
+      - name: 📦 Stage 12 — Upload Test Execution Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:

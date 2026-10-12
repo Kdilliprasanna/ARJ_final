@@ -163,6 +163,7 @@ async function run() {
   unitResults.forEach(ur => {
     results.unshift({
       testCaseId: ur.testCaseId,
+      module: 'Web Unit Tests',
       moduleId: 'UNIT_WEB',
       priority: 'P1',
       name: ur.name,
@@ -182,6 +183,7 @@ async function run() {
   loadResults.forEach(lr => {
     results.push({
       testCaseId: lr.testCaseId,
+      module: 'Web Load Tests',
       moduleId: 'LOAD_WEB',
       priority: 'P1',
       name: lr.name,

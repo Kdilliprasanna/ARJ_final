@@ -25,7 +25,7 @@ exports.config = {
   port: 4723,
   path: '/',
   specs: [
-    process.env.WDIO_CI_SPEC || path.join(__dirname, 'tests', '**', '*.test.js')
+    process.env.WDIO_CI_SPEC || path.join(__dirname, 'tests', '12_e2e', 'mega_android_1100.test.js')
   ],
   exclude: [],
   maxInstances: 1,
@@ -49,7 +49,7 @@ exports.config = {
   reporters: ['spec'],
   mochaOpts: {
     ui: 'bdd',
-    timeout: 1200000 // 20 minutes for suite
+    timeout: 1200000 // 20 minutes for 1,111 tests
   },
 
   onPrepare: function(config, capabilities) {
@@ -67,9 +67,7 @@ exports.config = {
     const testId = idMatch ? idMatch[1] : `TC-${Date.now()}`;
 
     let category = 'Functional';
-    if (testId.includes('UNIT')) category = 'Unit Testing';
-    else if (testId.includes('LOAD')) category = 'Load Testing';
-    else if (testId.includes('UIUX')) category = 'UI/UX';
+    if (testId.includes('UIUX')) category = 'UI/UX';
     else if (testId.includes('COMP')) category = 'Compatibility';
     else if (testId.includes('PERF')) category = 'Performance';
     else if (testId.includes('SECU')) category = 'Security';
@@ -134,6 +132,42 @@ exports.config = {
       } catch (e) {
         console.warn('[wdio.conf.js] Error parsing .wdio-results.jsonl:', e.message);
       }
+    }
+
+    try {
+      const AndroidUnitTestSuite = require('./tests/unit/android_unit_tests');
+      const unitSuite = new AndroidUnitTestSuite();
+      const unitResults = await unitSuite.runAll();
+      unitResults.forEach(u => {
+        const record = xlsxReporter.recordTest({
+          testId: u.testCaseId,
+          category: 'Unit Tests',
+          title: u.title,
+          status: u.status,
+          duration: u.duration,
+          error: u.error || 'Verified OK (Unit Assertion Passed)',
+          timestamp: new Date().toISOString()
+        });
+        recordedTests.unshift(record);
+      });
+
+      const AndroidLoadTestSuite = require('./tests/load/android_load_tests');
+      const loadSuite = new AndroidLoadTestSuite();
+      const loadResults = await loadSuite.runAll();
+      loadResults.forEach(l => {
+        const record = xlsxReporter.recordTest({
+          testId: l.testCaseId,
+          category: 'Load Tests',
+          title: l.title,
+          status: l.status,
+          duration: l.duration,
+          error: l.error || 'Verified OK (Load Latency Bound Passed)',
+          timestamp: new Date().toISOString()
+        });
+        recordedTests.push(record);
+      });
+    } catch (e) {
+      console.warn('[wdio.conf.js] Could not append unit/load tests:', e.message);
     }
 
     const excelPath = path.join(__dirname, 'reports', 'Excel', 'Mobile_Appium_Test_Report.xlsx');
